@@ -1,0 +1,33 @@
+name: Build Custom Kernel SM6250
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Kernel
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Kernel Source
+      uses: actions/checkout@v3
+
+    - name: Setup Build Environment
+      run: |
+        echo ">> Menginstall Dependencies..."
+        sudo apt-get update
+        sudo apt-get install -y git ccache automake flex lzop bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libxml2-utils bzip2 libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools pngcrush schedtool dpkg-dev liblz4-tool make optipng maven libssl-dev pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl bc libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev libgl1-mesa-dev xsltproc unzip
+
+    - name: Download Toolchain (Proton Clang)
+      run: |
+        echo ">> Mengambil Proton Clang 13..."
+        git clone --depth=1 https://github.com/kdrag0n/proton-clang.git clang
+
+    - name: Patch KernelSU Next v3.3.0 & SUSFS
+      run: |
+        echo ">> Memasang KernelSU Next & SUSFS..."
+        # Fetch KernelSU Next
+        rm -rf KernelSU drivers/kernelsu
+        git clone https://github.com/rifs25/KernelSU-Next.git -b v3.3.0 drivers/kernelsu
+        
+        # Fetch SUSFS
