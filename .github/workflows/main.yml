@@ -28,6 +28,6 @@ jobs:
         echo ">> Memasang KernelSU Next & SUSFS..."
         # Fetch KernelSU Next
         rm -rf KernelSU drivers/kernelsu
-        git clone https://github.com/rifs25/KernelSU-Next.git -b v3.3.0 drivers/kernelsu
+        git clone https://github.com/rifsxd/KernelSU-Next.git -b v3.3.0 drivers/kernelsu
         
         # Fetch SUSFS
