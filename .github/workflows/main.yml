@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     name: Build Kernel
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-20.04
     
     steps:
     - name: Checkout Kernel Source
@@ -26,8 +26,41 @@ jobs:
     - name: Patch KernelSU Next v3.3.0 & SUSFS
       run: |
         echo ">> Memasang KernelSU Next & SUSFS..."
-        # Fetch KernelSU Next
         rm -rf KernelSU drivers/kernelsu
         git clone https://github.com/rifsxd/KernelSU-Next.git -b v3.3.0 drivers/kernelsu
+        git clone https://gitlab.com/simonpunk/susfs4ksu.git -b kernel-4.14
         
-        # Fetch SUSFS
+        cp susfs4ksu/kernel_patches/fs/susfs.c fs/
+        cp susfs4ksu/kernel_patches/include/linux/susfs.c include/linux/
+        cp susfs4ksu/kernel_patches/include/linux/susfs_def.h include/linux/
+        
+        cd drivers/kernelsu
+        patch -p1 < ../../susfs4ksu/ksu_patches/ksu_next_v3.3.0_susfs.patch || true
+        cd ../..
+        patch -p1 < susfs4ksu/kernel_patches/50_add_susfs_in_kernel-4.14.patch || true
+
+    - name: Build Kernel
+      run: |
+        echo ">> Memulai Kompilasi Kernel..."
+        export PATH=$(pwd)/clang/bin:$PATH
+        export ARCH=arm64
+        export SUBARCH=arm64
+        
+        make O=out CC=clang CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- vendor/joyeuse_defconfig
+        make -j$(nproc --all) O=out CC=clang CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+
+    - name: Package AnyKernel3
+      run: |
+        echo ">> Membungkus ke AnyKernel3..."
+        git clone --depth=1 https://github.com/osm0sis/AnyKernel3.git ak3
+        cp out/arch/arm64/boot/Image.gz-dtb ak3/ || echo "Image.gz-dtb tidak ditemukan"
+        cd ak3
+        rm -rf .git README.md
+        zip -r9 ../CustomKernel-SM6250-KSU-SUSFS.zip *
+
+    - name: Upload Kernel Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: CustomKernel-SM6250-KSU-SUSFS
+        path: CustomKernel-SM6250-KSU-S
+        USFS.zip
