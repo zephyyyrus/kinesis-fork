@@ -41,6 +41,32 @@ jobs:
 
     - name: Build Kernel
       run: |
+        echo ">> Menambahkan Config KSU, SUSFS, Universal OS & Uclamp..."
+        cat <<EOF >> arch/arm64/configs/vendor/joyeuse_defconfig
+        # KSU & SUSFS
+        CONFIG_KSU=y
+        CONFIG_KSU_SUSFS=y
+        CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y
+        CONFIG_KSU_SUSFS_SUS_PATH=y
+        CONFIG_KSU_SUSFS_SUS_MOUNT=y
+        CONFIG_KSU_SUSFS_AUTO_ADD_SUS_KSUD=y
+        CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT=y
+        
+        # Universal MIUI 12 - HyperOS 3 & Android 11 - 16
+        CONFIG_MIUI_CUSTOM_DISPLAY=y
+        CONFIG_ANDROID_BINDER_IPC=y
+        CONFIG_ANDROID_BINDERFS=y
+        CONFIG_ASHMEM=y
+        CONFIG_BPF_SYSCALL=y
+        CONFIG_CGROUP_BPF=y
+        CONFIG_EROFS_FS=y
+        CONFIG_F2FS_FS=y
+        
+        # Optimisasi Uclamp
+        CONFIG_UCLAMP_TASK=y
+        CONFIG_UCLAMP_BUCKETS_COUNT=20
+        EOF
+        
         echo ">> Memulai Kompilasi Kernel..."
         export PATH=$(pwd)/clang/bin:$PATH
         export ARCH=arm64
