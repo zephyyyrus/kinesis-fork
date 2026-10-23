@@ -62,5 +62,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: CustomKernel-SM6250-KSU-SUSFS
-        path: CustomKernel-SM6250-KSU-S
-        USFS.zip
+        path: CustomKernel-SM6250-KSU-SUSFS.zip
